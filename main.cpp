@@ -1,6 +1,7 @@
 #include "config/config.hpp"
 #include "imwindows/imwindows.hpp"
 
+#include "requests/register_client.hpp"
 #include "requests/amount_masters.hpp"
 #include "requests/amount_accidents.hpp"
 #include "requests/average_cost_repairing.hpp"
@@ -11,6 +12,7 @@
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, INT nCmdShow) {
     ImWindows im_window{L"Курсова робота", L"CourseWorkWindowClass", hInstance};
 
+    im_window.addItem<Requests::RegisterClient>();
     im_window.addItem<Requests::AmountMasters>();
     im_window.addItem<Requests::AmountAccidents>();
     im_window.addItem<Requests::AverageCostRepairing>();

@@ -104,8 +104,8 @@ ImWindows::ImWindows(LPCWSTR name, LPCWSTR className, HINSTANCE hInstance) {
                                 WS_OVERLAPPEDWINDOW,
                                 100,
                                 100,
-                                1280,
-                                800,
+                                720,
+                                400,
                                 nullptr,
                                 nullptr,
                                 windowClass.hInstance,
@@ -122,9 +122,12 @@ ImWindows::ImWindows(LPCWSTR name, LPCWSTR className, HINSTANCE hInstance) {
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImFontConfig fconf;
+    fconf.OversampleH = 4;
+
     io.Fonts->AddFontFromFileTTF(R"(C:\Windows\Fonts\trebuc.ttf)",
                                  14.0f,
-                                 nullptr,
+                                 &fconf,
                                  io.Fonts->GetGlyphRangesCyrillic());
 
     ImGui::StyleColorsLight();

@@ -16,6 +16,8 @@ target_sources(imgui PRIVATE
         ${IMGUI_DIR}/imgui_tables.cpp
         ${IMGUI_DIR}/imgui_widgets.cpp
 
+        ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
+
         ${IMGUI_DIR}/backends/imgui_impl_dx11.cpp
         ${IMGUI_DIR}/backends/imgui_impl_win32.cpp
 )
@@ -26,3 +28,9 @@ if (MSVC)
 endif()
 add_executable(${PROJECT_NAME} WIN32 main.cpp imwindows/imwindows.cpp imguiaddons/imguidatechooser.cpp requests/amount_masters.hpp resources/application_icon.rc)
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui)
+
+option(DOTEST "Compile tests" ON)
+
+if(DOTEST)
+    add_subdirectory("tests")
+endif()

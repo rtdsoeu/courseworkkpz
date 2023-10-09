@@ -23,14 +23,13 @@ namespace Requests {
                 ImGui::PopStyleVar(1);
                 ImGui::EndPopup();
             }
-            if (ImGui::BeginTable("tablemasters", 8, ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_RowBg)) {
+            if (ImGui::BeginTable("tablemasters", 7, ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_RowBg)) {
                 ImGui::TableSetupColumn("# віділення");
                 ImGui::TableSetupColumn("ПІБ");
                 ImGui::TableSetupColumn("Адреса");
                 ImGui::TableSetupColumn("Номер телефону");
                 ImGui::TableSetupColumn("Стаж(роки)");
                 ImGui::TableSetupColumn("# бригади");
-                ImGui::TableSetupColumn("Стан");
                 ImGui::TableSetupColumn("##delete", ImGuiTableColumnFlags_WidthFixed, 20.f);
 
                 ImGui::TableSetupScrollFreeze(0, 1);
@@ -50,20 +49,6 @@ namespace Requests {
                     ImGui::Text("%d", master["experience"].get<int>());
                     ImGui::TableNextColumn();
                     ImGui::Text("%d", master["brigade_number"].get<int>());
-                    ImGui::TableNextColumn();
-                    switch (master["status"].get<Master::Status>()) {
-                        using
-                        enum Master::Status;
-                        case kFree:
-                            ImGui::Text("Вільний");
-                            break;
-                        case kInTheWay:
-                            ImGui::Text("В дорозі");
-                            break;
-                        case kBusy:
-                            ImGui::Text("Зайнятий");
-                            break;
-                    }
                     ImGui::TableNextColumn();
                     if (ImGui::Button(("x##" + std::to_string(i++)).c_str()))
                         remove_item_index = i;
