@@ -9,18 +9,18 @@
 
 namespace Requests {
     class EarningsMasters {
-        inline static bool date_filtering{false};
-        inline static ImGuiTextFilter name_filter;
-        inline static tm date_chooser_begin;
-        inline static tm date_chooser_end;
-        inline static time_t begin_t;
-        inline static time_t end_t;
+        bool date_filtering{false};
+        ImGuiTextFilter name_filter;
+        tm date_chooser_begin;
+        tm date_chooser_end;
+        time_t begin_t;
+        time_t end_t;
     public:
-        static const char *getMenuName() {
+        auto getMenuName() {
             return "Заробіток майстра з ... по ...";
         }
 
-        static void render() {
+        void render() {
             ImGui::Text("Заробіток майстра розраховується за формулою: зарплата(15.000 грн/місяць) + премії");
 
             name_filter.Draw("Пошук по імені");
@@ -41,7 +41,7 @@ namespace Requests {
                     continue;
                 auto cost = accident["cost"].get<double>();
                 auto brigade_number = accident["brigade_number"].get<int>();
-                switch (accident["type"].get<Accident::Type>()) {
+                switch (accident["type"].get<Accident::Type>()) { // розрахунок премій 1%, 3% або 5%
                     case Accident::Type::kEasy:
                         brigade_earnings[brigade_number] += cost * 0.01;
                         break;
@@ -59,16 +59,11 @@ namespace Requests {
                 ImGui::TableSetupColumn("Заробіток");
                 ImGui::TableHeadersRow();
                 for (const auto &master: GetAllMasters()) {
-                    const auto full_name{master["full_name"].get<std::string>()};
-                    if (!name_filter.PassFilter(full_name.c_str()))
+                    const auto full_name = master["full_name"].get<std::string>();
+                    if (!name_filter.PassFilter(full_name.c_str())) // Фільтр по імені майстра
                         continue;
-                    const auto brigade_number{master["brigade_number"].get<int>()};
-                    double master_earnings{brigade_earnings[brigade_number]};
-                    if (date_filtering)
-                        master_earnings += (date_chooser_end.tm_yday - date_chooser_begin.tm_yday +
-                                            ((date_chooser_end.tm_year - date_chooser_begin.tm_year) * 365)) * 500;
-                    else
-                        master_earnings += 15000;
+                    const auto brigade_number = master["brigade_number"].get<int>();
+                    double master_earnings = calculate_earnings(brigade_earnings[brigade_number]);
                     ImGui::TableNextColumn();
                     ImGui::Text("%s", full_name.c_str());
                     ImGui::TableNextColumn();
@@ -76,6 +71,14 @@ namespace Requests {
                 }
                 ImGui::EndTable();
             }
+        }
+    private:
+        double calculate_earnings(double brigade_earnings) {
+            if (date_filtering) // Якщо фільтр по датам активний - рахувати зарплату по дням 
+                return brigade_earnings + (date_chooser_end.tm_yday - date_chooser_begin.tm_yday +
+                        ((date_chooser_end.tm_year - date_chooser_begin.tm_year) * 365)) * 500;
+            else // інакше рахувати стандартну зарплату за місяць
+                return brigade_earnings + 15000;
         }
     };
 }

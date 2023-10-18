@@ -2,22 +2,36 @@
 
 #include <Windows.h>
 #include <d3d11.h>
-#include <functional>
-
 #pragma comment(lib, "d3d11.lib")
-
-#include "../imguiaddons/imguidatechooser.h"
+#include <functional>
+#include <type_traits>
+#include <string_view>
+#include <memory>
 #include "imgui.h"
-#include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
+#include "imgui_impl_win32.h"
+#include "misc/cpp/imgui_stdlib.h"
+#include "../imguiaddons/imguidatechooser.h"
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+template <typename T>
+concept StaticCallable = requires {
+    T::render();
+    {std::invoke(&T::getMenuName)} -> std::convertible_to<std::string_view>;
+};
+
+template <typename T>
+concept NonStaticCallable = !StaticCallable<T> && std::default_initializable<T> && requires(T t) {
+    t.render();
+    {std::invoke(&T::getMenuName, t)} -> std::convertible_to<std::string_view>;
+};
 
 class ImWindows {
 public:
     struct Item {
-        const char *menu;
-        std::function<void()> body;
+        std::string_view menuName;
+        std::function<void()> bodyCallback;
     };
 private:
     inline static ID3D11Device *d3dDevice{nullptr};
@@ -26,8 +40,8 @@ private:
     inline static ID3D11RenderTargetView *d3dMainRenderTargetView{nullptr};
     inline static WNDCLASSEX windowClass{};
     inline static HWND mainWindow{};
-    std::vector<Item> items{};
-    size_t currentItem{0};
+    inline static std::vector<Item> items{};
+    inline static size_t currentItem{0};
 
     static bool createDeviceD3D(HWND hWnd);
 
@@ -50,9 +64,20 @@ public:
 
     void addItem(const Item &item);
 
-    template<class T> void addItem();
+    template<StaticCallable T> 
+    void addItem();
+    template<NonStaticCallable T> 
+    void addItem();
 };
 
-template<class T> void ImWindows::addItem() {
-    items.push_back({T::getMenuName(), T::render});
+template<StaticCallable T> 
+void ImWindows::addItem() {
+    items.push_back({std::invoke(T::getMenuName), T::render});
+}
+template<NonStaticCallable T>
+void ImWindows::addItem() {
+    static std::vector<std::unique_ptr<T>> objectsHolder;
+    objectsHolder.push_back(std::make_unique<T>());
+    T* object = objectsHolder.back().get();
+    items.push_back({std::invoke(&T::getMenuName, object), std::bind(&T::render, object)});
 }

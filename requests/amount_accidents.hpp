@@ -10,17 +10,16 @@
 
 namespace Requests {
     class AmountAccidents {
-        inline static bool filtering{false};
-        inline static tm date_chooser_begin;
-        inline static tm date_chooser_end;
-        inline static time_t begin_t;
-        inline static time_t end_t;
+        bool filtering{false};
+        tm date_chooser_begin;
+        tm date_chooser_end;
+        time_t begin_t;
+        time_t end_t;
     public:
-        static const char *getMenuName() {
+        auto getMenuName() {
             return "Кількість аварій";
         }
-
-        static void render() {
+        void render() {
             if (ImGui::Button("Зареєструвати аварію"))
                 ImGui::OpenPopup("Зареєструвати аварію");
             ImGui::SameLine();
@@ -63,8 +62,7 @@ namespace Requests {
                     ImGui::Text("%s", accident["address"].get<std::string>().c_str());
                     ImGui::TableNextColumn();
                     switch (accident["status"].get<Accident::Status>()) {
-                        using
-                        enum Accident::Status;
+                        using enum Accident::Status;
                         case kSolved:
                             ImGui::Text("Вирішено");
                             break;
@@ -83,8 +81,7 @@ namespace Requests {
                     }
                     ImGui::TableNextColumn();
                     switch (accident["type"].get<Accident::Type>()) {
-                        using
-                        enum Accident::Type;
+                        using enum Accident::Type;
                         case kEasy:
                             ImGui::Text("Легка");
                             break;
@@ -112,8 +109,8 @@ namespace Requests {
                 ImGui::EndTable();
             }
         }
-
-        static void renderAddAccident() {
+    private:
+        void renderAddAccident() {
             static struct {
                 char address[256];
                 int status;

@@ -92,6 +92,7 @@ LRESULT WINAPI ImWindows::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 }
 
 ImWindows::ImWindows(LPCWSTR name, LPCWSTR className, HINSTANCE hInstance) {
+    if (d3dDevice != nullptr) return;
     windowClass = {
             sizeof(windowClass), CS_CLASSDC, WndProc, 0L, 0L, hInstance,
             LoadIcon(hInstance, L"IDI_ICON1"), nullptr, nullptr,
@@ -137,6 +138,7 @@ ImWindows::ImWindows(LPCWSTR name, LPCWSTR className, HINSTANCE hInstance) {
 }
 
 ImWindows::~ImWindows() {
+    if (d3dDevice == nullptr) return;
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
@@ -158,7 +160,7 @@ void ImWindows::mainloop() {
 
     ImGui::Begin("Main", nullptr, flags);
     {
-        ImGui::BeginChild("Navigation", {viewport->WorkSize.x / 4, -1}, true);
+        ImGui::BeginChild("Navigation", {viewport->WorkSize.x / 3, -1}, true);
         {
             for (int i = 0; i < items.size(); ++i) {
                 static bool color_pushed{false};
@@ -168,7 +170,7 @@ void ImWindows::mainloop() {
                     ImGui::PushStyleColor(ImGuiCol_Button, col);
                     color_pushed = true;
                 }
-                if (ImGui::Button(items[i].menu, {-1, 30})) {
+                if (ImGui::Button(items[i].menuName.data(), { -1, 30})) {
                     currentItem = i;
                 }
                 if (color_pushed) {
@@ -181,7 +183,7 @@ void ImWindows::mainloop() {
         ImGui::SameLine();
         ImGui::BeginChild("Body", {-1, -1}, true);
         {
-            items[currentItem].body();
+            items[currentItem].bodyCallback();
         }
         ImGui::EndChild();
     }

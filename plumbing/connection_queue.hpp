@@ -4,19 +4,22 @@
 #define COURSEWORK_PLUMBING_CONNECTION_QUEUE_HPP_
 #include <string>
 #include <queue>
-
+#include <format>
+#include "contract.hpp"
 class ConnectionQueue
 {
-	using none_t = bool;
-	std::queue<none_t> queue;
+	std::queue<Contract> queue;
  public:
 	std::string getAvaliableDate()
 	{
-		return {"Мінімальна доступна дата підключення: через " + std::to_string(queue.size()) + " днів"};
+		return std::format("Мінімальна доступна дата підключення: через {} днів", queue.size());
 	}
-	void addContract()
+	void addContract(Contract c)
 	{
-		queue.push(0);
+		queue.push(c);
+	}
+	Contract& getTop() {
+		return queue.back();
 	}
 	void removeContract()
 	{

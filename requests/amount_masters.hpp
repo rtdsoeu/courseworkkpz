@@ -7,12 +7,13 @@
 #include "utils.hpp"
 
 namespace Requests {
+    
     struct AmountMasters {
-        static const char *getMenuName() {
+        auto getMenuName() {
             return "Кількість майстрів";
         }
 
-        static void render() {
+        void render() {
             if (ImGui::Button("Додати майстра"))
                 ImGui::OpenPopup("Додати майстра");
             ImGui::SameLine();
@@ -60,9 +61,8 @@ namespace Requests {
                 ImGui::EndTable();
             }
         }
-
-        static void renderAddMaster() {
-            static struct {
+    private:
+        struct {
                 int departament_number;
                 char full_name[256];
                 char address[256];
@@ -70,6 +70,8 @@ namespace Requests {
                 int experience;
                 int brigade_number;
             } input_master{};
+
+        void renderAddMaster() {
             ImGui::InputInt("Номер відділення##input", &input_master.departament_number);
             ImGui::InputText("ПІБ##input", input_master.full_name, sizeof(input_master.full_name));
             ImGui::InputText("Адреса##input", input_master.address, sizeof(input_master.address));
@@ -80,11 +82,9 @@ namespace Requests {
                 if (strlen(input_master.full_name) == 0 || strlen(input_master.address) == 0) {
                     ImGui::OpenPopup("Помилка");
                 } else {
-                    Master temp
-                            {input_master.departament_number, input_master.full_name, input_master.address,
-                             input_master.phone_number,
-                             input_master.experience, input_master.brigade_number};
-                    GetAllMasters().push_back(temp);
+                    GetAllMasters().emplace_back(Master{input_master.departament_number, input_master.full_name, 
+                             input_master.address, input_master.phone_number,
+                             input_master.experience, input_master.brigade_number});
                     ZeroMemory(&input_master, sizeof(input_master));
                     SortMasters();
                 }
